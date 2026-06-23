@@ -535,11 +535,10 @@ def main():
         spawn_timer = 0
         death_sequence, death_timer, screen_offset = False, 0, [0, 0]
 
-        # Inisialisasi Fitur Pause Menu Baru & Speed Boost
         is_paused = False
-        pause_selection = 0 # 0 = RESUME, 1 = QUIT
+        pause_selection = 0 
         blurred_surf = None
-        resume_boost_timer = 0 # Durasi efek percepatan game pasca-pause (milidetik)
+        resume_boost_timer = 0 
 
         gameplay_running = True
         while gameplay_running:
@@ -547,19 +546,16 @@ def main():
 
             # --- KONDISI GAME SEDANG DI-PAUSE ---
             if is_paused:
-                screen.blit(blurred_surf, (0, 0)) # Gambar screenshot blur di background
+                screen.blit(blurred_surf, (0, 0)) 
 
-                # Kotak Menu Pop-up Center
                 m_width, m_height = 400, 250
                 m_rect = pygame.Rect((WIDTH//2 - m_width//2, HEIGHT//2 - m_height//2), (m_width, m_height))
                 pygame.draw.rect(screen, (10, 15, 30), m_rect, border_radius=12)
                 pygame.draw.rect(screen, CYAN, m_rect, 3, border_radius=12)
 
-                # Judul Pop-up Menu
                 txt_pause_title = font_math.render("COMMAND INTERFACE", True, CYAN)
                 screen.blit(txt_pause_title, txt_pause_title.get_rect(center=(WIDTH//2, HEIGHT//2 - 80)))
 
-                # Opsi Menu (Resume / Quit)
                 res_color = YELLOW if pause_selection == 0 else WHITE
                 quit_color = YELLOW if pause_selection == 1 else WHITE
 
@@ -574,7 +570,6 @@ def main():
 
                 pygame.display.flip()
 
-                # Event Handler Khusus Menu Pause
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit(); return
@@ -583,8 +578,8 @@ def main():
                             pause_selection = 0
                         elif event.key in (pygame.K_DOWN, pygame.K_s):
                             pause_selection = 1
-                        elif event.key in (pygame.K_ESCAPE, pygame.K_p):
-                            # Tutup pause & aktifkan boost kecepatan 1 detik (1000ms)
+                        # FIXED: Melanjutkan game lewat tombol ESC murni
+                        elif event.key == pygame.K_ESCAPE:
                             is_paused = False
                             resume_boost_timer = 1000 
                         elif event.key == pygame.K_RETURN:
@@ -593,7 +588,7 @@ def main():
                                 resume_boost_timer = 1000
                             elif pause_selection == 1:
                                 pygame.quit(); return
-                continue # Skip update logika gameplay jika sedang pause
+                continue 
 
             # --- KONDISI GAMEPLAY BERJALAN NORMAL ---
             if death_sequence: 
@@ -603,10 +598,9 @@ def main():
                 screen_offset = [0, 0]
                 time_scale = 1.0
 
-            # Logika Aturan "Dicepatkan di 1 Detik Awal" saat unpause
             if resume_boost_timer > 0:
                 resume_boost_timer -= dt
-                time_scale *= 2.2 # Melipatgandakan kecepatan gerak alien/bintang selama 1 detik penuh
+                time_scale *= 2.2 
 
             screen.fill(BLACK)
 
@@ -630,17 +624,15 @@ def main():
                     if event.type == pygame.QUIT:
                         pygame.quit(); return
                     if event.type == pygame.KEYDOWN:
-                        # Fungsi Memicu Menu Pause (Tombol ESC atau P)
-                        if event.key in (pygame.K_ESCAPE, pygame.K_p):
+                        # FIXED: Memicu pause hanya dengan tombol ESC murni
+                        if event.key == pygame.K_ESCAPE:
                             is_paused = True
                             pause_selection = 0
                             
-                            # Teknik Downscaling & Upscaling Mendadak untuk Efek Blur Total
                             raw_capture = screen.copy()
                             low_res = pygame.transform.smoothscale(raw_capture, (WIDTH // 28, HEIGHT // 28))
                             blurred_surf = pygame.transform.smoothscale(low_res, (WIDTH, HEIGHT))
                             
-                            # Tambah lapisan hitam transparan agar tulisan menu terbaca jelas
                             dark_dim = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
                             dark_dim.fill((5, 5, 15, 180))
                             blurred_surf.blit(dark_dim, (0, 0))
@@ -704,7 +696,6 @@ def main():
             screen.blit(font_ui.render(ui_text, True, CYAN), (30, 25))
             screen.blit(font_ui.render(ui_text_2, True, YELLOW), (30, 55))
             
-            # Tampilkan Indikator Visual Jika Sedang Dalam Masa Akselerasi Pemulihan
             if resume_boost_timer > 0:
                 txt_boost_alert = font_ui.render(">> WARP DRIVE ACTIVE: ACCELERATING SYNC <<", True, ORANGE)
                 screen.blit(txt_boost_alert, txt_boost_alert.get_rect(center=(WIDTH//2, 35)))
